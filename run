@@ -1,5 +1,4 @@
 #!/bin/bash
-#THIS REVISES THE DIRECTORY STRUCTURE OF AN FMRIPREP DIRECTORY (V.21.0.1) TO MEET BSLPP REQUIREMENTS
 
 # Written by: Andrew Geoly, MS
 #Stanford Brain Stimulation Lab
