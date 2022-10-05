@@ -1,0 +1,79 @@
+#!/bin/bash
+#THIS REVISES THE DIRECTORY STRUCTURE OF AN FMRIPREP DIRECTORY (V.21.0.1) TO MEET BSLPP REQUIREMENTS
+
+# Written by: Andrew Geoly, MS
+#Stanford Brain Stimulation Lab
+#5/11/2022
+
+
+
+##############################################################################
+# Configure paths
+
+FLYWHEEL_BASE=/flywheel/v0
+OUT_DIR=/flywheel/v0/output
+WORK_DIR=/flywheel/v0/work
+CONFIG_FILE=$FLYWHEEL_BASE/config.json
+MANIFEST_FILE=$FLYWHEEL_BASE/manifest.json
+
+if [[ ! -f $CONFIG_FILE ]]; then
+  CONFIG_FILE=$MANIFEST_FILE
+fi
+
+##############################################################################
+# Parse configuration
+
+# If the config file does not exist (i.e., local run) then parse the config
+# options and values from the manifest. Those variables can be found in the
+# manifest.json file within the `config` map.
+
+
+function parse_config {
+  # If config.json exists, then we parse config file  Otherwise we parse
+  # manifest.json.
+
+  CONFIG_FILE=$FLYWHEEL_BASE/config.json
+  MANIFEST_FILE=$FLYWHEEL_BASE/manifest.json
+
+  if [[ -f $CONFIG_FILE ]]; then
+    echo "$(cat $CONFIG_FILE | jq -r '.config.'$1)"
+  else
+    CONFIG_FILE=$MANIFEST_FILE
+    echo "$(cat $MANIFEST_FILE | jq -r '.config.'$1'.default')"
+  fi
+}
+
+##############################################################################
+
+##############################################################################
+# Extract the input file into working directory
+STD="$(parse_config 'STD')"
+echo "STD: $STD"
+INPUT_ANAT="$(cat $CONFIG_FILE | jq -r '.inputs.ANAT.location.path')"
+echo "input T1w: $INPUT_ANAT"
+
+
+if [ ! -d $WORK_DIR ]; then
+  mkdir $WORK_DIR
+fi
+
+echo "copying $INPUT_ANAT to $WORK_DIR"
+echo "cp "$INPUT_ANAT" $WORK_DIR"
+cp "$INPUT_ANAT" $WORK_DIR/T1.nii
+
+cp -r $FLYWHEEL_BASE/STD_MASKS $WORK_DIR
+cp $FLYWHEEL_BASE/BrainTemplates/${STD} $WORK_DIR
+
+cd $WORK_DIR
+INPUT_ANAT1=$WORK_DIR/T1.nii
+ROI_DIR=$WORK_DIR/STD_MASKS
+STD1=$WORK_DIR/${STD}
+##############################################################################
+echo "/flywheel/v0/Structural_Targeting.sh ${INPUT_ANAT1} ${ROI_DIR} ${STD1} ${OUT_DIR}"
+  /flywheel/v0/Structural_Targeting.sh ${INPUT_ANAT1} ${ROI_DIR} ${STD1} 
+
+
+echo "Done Creating Structural Targets"
+
+echo"Moving output files to output folder"
+cp -r $WORK_DIR/outputs ${OUT_DIR}
