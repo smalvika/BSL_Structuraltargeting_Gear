@@ -58,7 +58,7 @@ fi
 
 echo "copying $INPUT_ANAT to $WORK_DIR"
 echo "cp "$INPUT_ANAT" $WORK_DIR"
-cp "$INPUT_ANAT" $WORK_DIR/T1.nii
+cp $INPUT_ANAT $WORK_DIR/T1.nii
 
 cp -r $FLYWHEEL_BASE/STD_MASKS $WORK_DIR
 cp $FLYWHEEL_BASE/BrainTemplates/${STD} $WORK_DIR
